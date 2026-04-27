@@ -179,14 +179,14 @@ export function BillsPage() {
           <ToolbarHeading>
             <ToolbarPageTitle>Property Bills</ToolbarPageTitle>
           </ToolbarHeading>
-          <ToolbarActions className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap justify-end">
+          <ToolbarActions className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto flex-wrap justify-start lg:justify-end">
             {isSupabaseConfigured && !isLoading && (bills?.length || 0) > 0 && (
               <>
                 <Select
                   value={categoryFilter}
                   onValueChange={setCategoryFilter}
                 >
-                  <SelectTrigger className="w-[140px] sm:w-[160px] h-9">
+                  <SelectTrigger className="w-full sm:w-[160px] h-9">
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
@@ -197,8 +197,8 @@ export function BillsPage() {
                   </SelectContent>
                 </Select>
                 
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
                     <span className="text-xs text-muted-foreground hidden sm:inline-block">From</span>
                     <Input 
                       type="date" 
@@ -208,13 +208,13 @@ export function BillsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
                     <span className="text-xs text-muted-foreground hidden sm:inline-block">To</span>
                     <Input 
                       type="date" 
                       value={dateFilterTo} 
                       onChange={(e) => setDateFilterTo(e.target.value)} 
-                      className="h-9 w-[130px]"
+                      className="h-9 w-full sm:w-[130px]"
                     />
                   </div>
                 </div>

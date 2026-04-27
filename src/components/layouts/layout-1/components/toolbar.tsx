@@ -19,8 +19,8 @@ function Toolbar({ children }: { children?: ReactNode }) {
   );
 }
 
-function ToolbarActions({ children }: { children?: ReactNode }) {
-  return <div className="flex items-center gap-2.5">{children}</div>;
+function ToolbarActions({ children, className }: { children?: ReactNode; className?: string }) {
+  return <div className={cn("flex items-center gap-2.5", className)}>{children}</div>;
 }
 
 function ToolbarBreadcrumbs() {
