@@ -229,18 +229,18 @@ export function JoinPage() {
           display: flex;
           min-height: 100vh;
           width: 100%;
-          background: linear-gradient(135deg, #E67E22 0%, #C0392B 100%);
           position: relative;
           overflow: hidden;
           align-items: center;
           justify-content: center;
           padding: 48px 24px;
+          background: linear-gradient(135deg, #8eb1a1 0%, #769b8a 50%, #5e7c6e 100%);
         }
 
         .join-card {
           width: 100%;
           max-width: 500px;
-          background: rgba(255, 255, 255, 0.97);
+          background: rgba(255, 250, 245, 0.97);
           border-radius: 32px;
           padding: 44px;
           box-shadow: 0 32px 80px rgba(0,0,0,0.2);
@@ -279,22 +279,13 @@ export function JoinPage() {
       `}</style>
 
       <div className="join-root">
-        {/* Grid overlay */}
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.08, pointerEvents: 'none' }}>
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="join-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#join-grid)" />
-          </svg>
-        </div>
-
-        {/* Decorative blobs */}
-        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 350, height: 350, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '5%', left: '-8%', width: 280, height: 280, borderRadius: '50%', background: 'rgba(0,0,0,0.1)', filter: 'blur(50px)', pointerEvents: 'none' }} />
-
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 grid-pattern opacity-40 pointer-events-none" />
+        
+        {/* Decorative glowing blobs */}
+        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-white/10 blur-3xl pulse-glow pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-emerald-900/10 blur-3xl pulse-glow pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-black/10 blur-3xl pulse-glow pointer-events-none" />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 500, position: 'relative', zIndex: 10 }}>
           {/* Logo */}
           <div className="join-logo">
@@ -546,12 +537,19 @@ export function JoinPage() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 8,
+          padding: '0 24px',
           zIndex: 10,
         }}>
-          <h1 style={{ fontSize: 'clamp(1.25rem, 2vw, 1.6rem)', fontWeight: 900, color: 'white', lineHeight: 1.2, margin: 0 }}>
+          <h2 style={{ 
+            fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', 
+            fontWeight: 900, 
+            color: 'white', 
+            lineHeight: 1.3, 
+            margin: 0,
+            textAlign: 'center'
+          }}>
             Connect with your housemates and get in sync.&nbsp;&nbsp;🚀
-          </h1>
+          </h2>
         </div>
       </div>
     </>

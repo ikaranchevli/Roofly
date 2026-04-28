@@ -116,8 +116,13 @@ DROP POLICY IF EXISTS "profiles_strict_update" ON users;
 DROP POLICY IF EXISTS "users_permissive_select" ON users;
 DROP POLICY IF EXISTS "users_permissive_insert" ON users;
 DROP POLICY IF EXISTS "users_strict_update" ON users;
+-- Cleanup existing policies to ensure idempotency
 DROP POLICY IF EXISTS "users_self_select" ON users;
 DROP POLICY IF EXISTS "users_household_select" ON users;
+DROP POLICY IF EXISTS "users_admin_insert" ON users;
+DROP POLICY IF EXISTS "users_self_update" ON users;
+DROP POLICY IF EXISTS "users_admin_update" ON users;
+DROP POLICY IF EXISTS "users_admin_delete" ON users;
 
 -- Users can see themselves
 CREATE POLICY "users_self_select" ON users FOR SELECT USING (id = auth.uid());
@@ -127,13 +132,19 @@ CREATE POLICY "users_household_select" ON users FOR SELECT USING (
     household_id = get_my_household_id()
 );
 
-CREATE POLICY "users_permissive_insert" ON users FOR INSERT WITH CHECK (true);
+-- ONLY admins can insert new users (tenants)
+CREATE POLICY "users_admin_insert" ON users FOR INSERT WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM users AS me
+    WHERE me.id = auth.uid()
+      AND me.role = 'admin'
+  )
+);
 
 -- Users can update their own row
 CREATE POLICY "users_self_update" ON users FOR UPDATE USING (id = auth.uid());
 
 -- Admins can update any user in their household
-DROP POLICY IF EXISTS "users_admin_update" ON users;
 CREATE POLICY "users_admin_update" ON users FOR UPDATE USING (
   EXISTS (
     SELECT 1 FROM users AS me
@@ -143,12 +154,36 @@ CREATE POLICY "users_admin_update" ON users FOR UPDATE USING (
   )
 );
 
+-- ONLY admins can delete users (tenants)
+DROP POLICY IF EXISTS "users_admin_delete" ON users;
+CREATE POLICY "users_admin_delete" ON users FOR DELETE USING (
+  EXISTS (
+    SELECT 1 FROM users AS me
+    WHERE me.id = auth.uid()
+      AND me.household_id = users.household_id
+      AND me.role = 'admin'
+  )
+);
+
+DROP POLICY IF EXISTS "users_permissive_insert" ON users;
 DROP POLICY IF EXISTS "users_strict_update" ON users;
 
 -- Recreate household isolation policies for other tables
 DROP POLICY IF EXISTS "bills_household_isolation" ON bills;
-CREATE POLICY "bills_household_isolation" ON bills FOR ALL USING (
+
+-- All members can read bills
+CREATE POLICY "bills_read_isolation" ON bills FOR SELECT USING (
     household_id = get_my_household_id()
+);
+
+-- ONLY admins can manage bills (insert/update/delete)
+CREATE POLICY "bills_admin_manage" ON bills FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM users AS me
+    WHERE me.id = auth.uid()
+      AND me.household_id = bills.household_id
+      AND me.role = 'admin'
+  )
 );
 
 -- 8. Email Sync Trigger

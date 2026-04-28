@@ -132,7 +132,6 @@ export function SignUpPage() {
           display: flex;
           min-height: 100vh;
           width: 100%;
-          background: #fff;
         }
 
         .auth-orange-panel {
@@ -151,16 +150,27 @@ export function SignUpPage() {
           align-items: center;
           gap: 12px;
           padding: 20px 24px;
-          background: linear-gradient(135deg, #E67E22 0%, #C0392B 100%);
           flex-shrink: 0;
         }
 
         .auth-form-scroll {
           flex: 1;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          padding: 40px 24px;
+          justify-content: flex-start;
+          padding: 16px 24px 40px;
+          gap: 40px;
+          overflow-y: auto;
+        }
+
+        .auth-form-card {
+          width: 100%;
+          max-width: 500px;
+          background: #fffaf5;
+          border-radius: 32px;
+          padding: 44px 32px;
+          box-shadow: 0 30px 60px rgba(0,0,0,0.12);
         }
 
         @media (min-width: 1024px) {
@@ -177,7 +187,6 @@ export function SignUpPage() {
             position: relative;
             padding: 64px;
             overflow: hidden;
-            background: linear-gradient(135deg, #E67E22 0%, #C0392B 100%);
           }
 
           .auth-mobile-header {
@@ -192,6 +201,83 @@ export function SignUpPage() {
 
           .auth-form-scroll {
             padding: 48px;
+            background: #fffaf5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            overflow-y: hidden;
+          }
+
+          .auth-form-card {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: none;
+            display: flex;
+            justify-content: center;
+          }
+
+          .auth-form-inner {
+            width: 100%;
+            max-width: 550px;
+          }
+
+          .join-bottom-bar-wrapper {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 60%;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
+          }
+
+          .join-bottom-bar {
+            width: 90%;
+            max-width: 1790px;
+            height: 80px;
+            background: #769b8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 0 32px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+            pointer-events: auto;
+          }
+
+          .join-bottom-bar:hover {
+            height: 90px;
+            background: #6a8c7c;
+          }
+
+          .join-bar-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+          }
+
+          .join-bar-text {
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.95;
           }
         }
 
@@ -241,14 +327,24 @@ export function SignUpPage() {
         }
       `}</style>
 
-      <div className="auth-root">
+      <div className="auth-root gradient-sunset relative overflow-hidden">
+        {/* Mobile-only background effects */}
+        <div className="lg:hidden absolute inset-0 grid-pattern opacity-30 pointer-events-none" />
+        <div className="lg:hidden absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/20 blur-3xl pulse-glow pointer-events-none" />
+        <div className="lg:hidden absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-black/10 blur-3xl pulse-glow pointer-events-none" />
         {/* Desktop Left Panel */}
         <motion.div
-          className="auth-orange-panel"
+          className="auth-orange-panel gradient-sunset relative overflow-hidden"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 grid-pattern opacity-40 pointer-events-none" />
+
+          {/* Decorative glowing blobs */}
+          <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-white/20 blur-3xl pulse-glow pointer-events-none" />
+          <div className="absolute -bottom-40 -right-40 h-[500px] w-[500px] rounded-full bg-black/10 blur-3xl pulse-glow pointer-events-none" />
           <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -284,21 +380,6 @@ export function SignUpPage() {
               Create a space for your housemates, manage bills effortlessly, and keep everyone connected.
             </p>
           </motion.div>
-
-
-          {/* Decorative blobs */}
-          <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '10%', left: '-8%', width: 220, height: 220, borderRadius: '50%', background: 'rgba(0,0,0,0.08)', filter: 'blur(48px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.05, pointerEvents: 'none' }}>
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="signup-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#signup-grid)" />
-            </svg>
-          </div>
         </motion.div>
 
         {/* Form Panel */}
@@ -310,190 +391,211 @@ export function SignUpPage() {
         >
           {/* Mobile Header */}
           <div className="auth-mobile-header">
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 52, height: 52, borderRadius: 13,
-              background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
-              padding: 9, border: '1px solid rgba(255,255,255,0.3)', flexShrink: 0,
-            }}>
-              <img
-                src={toAbsoluteUrl('/logo-white.png')}
-                alt="Roofly"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                onError={(e) => { (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg'); }}
-              />
-            </div>
-            <span style={{ fontSize: 29, fontWeight: 400, color: 'white', fontFamily: "'Zolo', sans-serif", letterSpacing: '0.5px' }}>roofly</span>
-          </div>
-
-          <div className="auth-form-scroll overflow-y-auto">
-            <div className="w-full max-w-lg space-y-8">
-              <div className="flex flex-col gap-2">
-                <Link to="/login" className="flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-[#E67E22] transition-colors mb-2">
-                  <ChevronLeft className="size-4" /> Back to Sign In
-                </Link>
-                <h2 className="text-3xl lg:text-4xl font-extrabold text-zinc-900 tracking-tight">
-                  Create Your Household.
-                </h2>
-                <p className="text-zinc-500 text-base">
-                  Sign up as an admin to start managing your home.
-                </p>
+            <div className="w-full max-w-[500px] mx-auto flex items-center justify-between">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 52, height: 52, borderRadius: 14,
+                  background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+                  padding: 9, border: '1px solid rgba(255,255,255,0.3)', flexShrink: 0,
+                }}>
+                  <img
+                    src={toAbsoluteUrl('/logo-white.png')}
+                    alt="Roofly"
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    onError={(e) => { (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg'); }}
+                  />
+                </div>
+                <span style={{ fontSize: 32, fontWeight: 400, color: 'white', fontFamily: "'Zolo', sans-serif", letterSpacing: '0.5px' }}>roofly</span>
               </div>
 
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                {/* First Name */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">First Name</label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <input
-                      type="text"
-                      placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      required
-                      className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
-                    />
-                  </div>
+              <Link to="/join" style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(10px)',
+                  padding: '10px 20px',
+                  borderRadius: '100px',
+                  color: 'white',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <Home className="size-4" />
+                  Join a house
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          <div className="auth-form-scroll">
+            <div className="auth-form-card">
+              <div className="auth-form-inner space-y-8">
+                <div className="flex flex-col gap-2">
+                  <Link to="/login" className="flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-[#E67E22] transition-colors mb-2">
+                    <ChevronLeft className="size-4" /> Back to Sign In
+                  </Link>
+                  <h2 className="text-3xl lg:text-4xl font-extrabold text-zinc-900 tracking-tight">
+                    Create Your Household.
+                  </h2>
+                  <p className="text-zinc-500 text-base">
+                    Sign up as an admin to start managing your home.
+                  </p>
                 </div>
 
-                {/* Last Name */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Last Name</label>
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <input
-                      type="text"
-                      placeholder="Doe"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      required
-                      className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Email</label>
-                  <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <input
-                      type="email"
-                      placeholder="john@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Password</label>
-                  <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* Household Info Section */}
-                <div className="md:col-span-2 pt-2 pb-1">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px grow bg-zinc-100"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Household Details</span>
-                    <div className="h-px grow bg-zinc-100"></div>
-                  </div>
-                </div>
-
-                {/* House Name */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">House Name</label>
-                  <div className="relative group">
-                    <Home className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <input
-                      type="text"
-                      placeholder="e.g. The Green House"
-                      value={houseName}
-                      onChange={(e) => setHouseName(e.target.value)}
-                      required
-                      className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* House Address (Geoapify Autocomplete) */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">House Address</label>
-                  <div className="relative group geoapify-container">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
-                    <GeoapifyContext apiKey={import.meta.env.VITE_GEOAPIFY_API_KEY}>
-                      <GeoapifyGeocoderAutocomplete
-                        placeholder="Search address..."
-                        lang="en"
-                        limit={5}
-                        placeSelect={(value) => {
-                          const addr = value?.properties?.formatted || '';
-                          setAddress(addr);
-                        }}
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                  {/* First Name */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">First Name</label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <input
+                        type="text"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
                       />
-                    </GeoapifyContext>
+                    </div>
                   </div>
-                </div>
 
-                {/* Submit Button */}
-                <div className="md:col-span-2 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-6 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70"
-                    style={{
-                      backgroundColor: orangeColor,
-                      color: 'white',
-                      boxShadow: `0 8px 25px ${orangeColor}40`,
-                    }}
-                  >
-                    {isLoading ? (
-                      <><Loader2 className="size-5 animate-spin" /> Creating Account...</>
-                    ) : (
-                      <>Create My Household <ArrowRight className="size-5" /></>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="md:col-span-2 relative py-2">
-                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-zinc-100" />
+                  {/* Last Name */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Last Name</label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <input
+                        type="text"
+                        placeholder="Doe"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
+                      />
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs font-bold uppercase tracking-widest">
-                    <span className="bg-white px-6 text-zinc-400">Already have a Roofly Key?</span>
-                  </div>
-                </div>
 
-                <Link to="/join" className="block md:col-span-2 w-full">
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-base border-2 transition-all active:scale-[0.98] hover:shadow-lg"
-                    style={{ borderColor: orangeColor, color: orangeColor, background: 'rgba(230,126,34,0.05)' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = orangeColor; (e.currentTarget as HTMLButtonElement).style.color = 'white'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(230,126,34,0.05)'; (e.currentTarget as HTMLButtonElement).style.color = orangeColor; }}
-                  >
-                    <Home className="size-5" />
-                    Join a House
-                  </button>
-                </Link>
-              </form>
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Email</label>
+                    <div className="relative group">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <input
+                        type="email"
+                        placeholder="john@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">Password</label>
+                    <div className="relative group">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <input
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Household Info Section */}
+                  <div className="md:col-span-2 pt-2 pb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px grow bg-zinc-100"></div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Household Details</span>
+                      <div className="h-px grow bg-zinc-100"></div>
+                    </div>
+                  </div>
+
+                  {/* House Name */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">House Name</label>
+                    <div className="relative group">
+                      <Home className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <input
+                        type="text"
+                        placeholder="e.g. The Green House"
+                        value={houseName}
+                        onChange={(e) => setHouseName(e.target.value)}
+                        required
+                        className="block w-full pl-12 pr-4 py-3 bg-zinc-50/50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E67E22]/20 focus:border-[#E67E22] transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* House Address (Geoapify Autocomplete) */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-zinc-700 uppercase tracking-wider">House Address</label>
+                    <div className="relative group geoapify-container">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-zinc-400 group-focus-within:text-[#E67E22] transition-colors z-10" />
+                      <GeoapifyContext apiKey={import.meta.env.VITE_GEOAPIFY_API_KEY}>
+                        <GeoapifyGeocoderAutocomplete
+                          placeholder="Search address..."
+                          lang="en"
+                          limit={5}
+                          placeSelect={(value) => {
+                            const addr = value?.properties?.formatted || '';
+                            setAddress(addr);
+                          }}
+                        />
+                      </GeoapifyContext>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="md:col-span-2 pt-4">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-6 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70"
+                      style={{
+                        backgroundColor: orangeColor,
+                        color: 'white',
+                        boxShadow: `0 8px 25px ${orangeColor}40`,
+                      }}
+                    >
+                      {isLoading ? (
+                        <><Loader2 className="size-5 animate-spin" /> Creating Account...</>
+                      ) : (
+                        <>Create My Household <ArrowRight className="size-5" /></>
+                      )}
+                    </Button>
+                  </div>
+
+                </form>
+              </div>
             </div>
           </div>
         </motion.div>
+      </div>
+
+      {/* Desktop bottom bar */}
+      <div className="hidden lg:flex join-bottom-bar-wrapper">
+        <Link to="/join" className="join-bottom-bar">
+          <div className="join-bar-logo">
+            <img
+              src={toAbsoluteUrl('/logo-white.png')}
+              alt="Roofly"
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              onError={(e) => { (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg'); }}
+            />
+          </div>
+          <div className="join-bar-text">
+            JOIN WITH ROOFLY KEY
+          </div>
+        </Link>
       </div>
     </>
   );

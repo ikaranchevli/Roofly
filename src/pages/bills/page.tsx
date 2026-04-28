@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { format, parseISO } from 'date-fns';
 import { Plus, FileText, Calendar, DollarSign, Eye, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import { useBills, useDeleteBill } from '@/hooks/use-bills';
+import { useHousehold } from '@/hooks/use-household';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,9 +39,21 @@ import { BillFormSheet } from './components/bill-form-sheet';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import type { Bill } from '@/types/bill';
 
-function BillCard({ bill, onDelete, onEdit, onViewDoc }: { bill: Bill; onDelete: (id: string) => void; onEdit: (bill: Bill) => void; onViewDoc: (bill: Bill) => void }) {
+function BillCard({ 
+  bill, 
+  onDelete, 
+  onEdit, 
+  onViewDoc,
+  isAdmin,
+}: { 
+  bill: Bill; 
+  onDelete: (id: string) => void; 
+  onEdit: (bill: Bill) => void; 
+  onViewDoc: (bill: Bill) => void;
+  isAdmin: boolean;
+}) {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
+    <div className="bg-white border border-border rounded-xl p-5 hover:border-primary/50 transition-colors">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-center gap-3">
           <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${bill.category?.color || 'bg-slate-500'}`}>
@@ -72,30 +85,32 @@ function BillCard({ bill, onDelete, onEdit, onViewDoc }: { bill: Bill; onDelete:
                 <Eye className="size-4" />
               </Button>
             )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" mode="icon" className="h-8 w-8">
-                  <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(bill)}>
-                  <Edit2 className="size-4 mr-2" />
-                  Edit Bill
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                  onClick={() => {
-                    if (window.confirm('Delete this bill? This will also delete all calculated splits.')) {
-                      onDelete(bill.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="size-4 mr-2" />
-                  Delete Bill
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {isAdmin && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" mode="icon" className="h-8 w-8">
+                    <MoreVertical className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onEdit(bill)}>
+                    <Edit2 className="size-4 mr-2" />
+                    Edit Bill
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onClick={() => {
+                      if (window.confirm('Delete this bill? This will also delete all calculated splits.')) {
+                        onDelete(bill.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="size-4 mr-2" />
+                    Delete Bill
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
@@ -139,8 +154,11 @@ function BillCard({ bill, onDelete, onEdit, onViewDoc }: { bill: Bill; onDelete:
 
 export function BillsPage() {
   const { data: bills, isLoading } = useBills();
+  const { data: household } = useHousehold();
   const { data: categories } = useCategories();
   const deleteBill = useDeleteBill();
+  
+  const isAdmin = household?.userRole === 'admin';
   
   const [addOpen, setAddOpen] = useState(false);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
@@ -260,9 +278,11 @@ export function BillsPage() {
             <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto mb-6">
               Add your first utility or property bill to automatically split it among your tenants based on their stay duration.
             </p>
-            <Button onClick={openAddSheet}>
-              <Plus className="size-4 mr-1.5" /> Add First Bill
-            </Button>
+            {isAdmin && (
+              <Button onClick={openAddSheet}>
+                <Plus className="size-4 mr-1.5" /> Add First Bill
+              </Button>
+            )}
           </div>
         ) : !filteredBills || filteredBills.length === 0 ? (
           <div className="p-12 text-center bg-card rounded-xl border border-border">
@@ -285,6 +305,7 @@ export function BillsPage() {
               <BillCard
                 key={bill.id}
                 bill={bill}
+                isAdmin={isAdmin}
                 onDelete={(id) => deleteBill.mutate(id)}
                 onEdit={openEditSheet}
                 onViewDoc={setViewingDoc}
@@ -320,14 +341,16 @@ export function BillsPage() {
         </DialogContent>
       </Dialog>
 
-      <Button
-        size="icon"
-        className="fixed bottom-8 right-8 size-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 z-40"
-        onClick={openAddSheet}
-        disabled={!isSupabaseConfigured}
-      >
-        <Plus className="size-6" />
-      </Button>
+      {isAdmin && (
+        <Button
+          size="icon"
+          className="fixed bottom-8 right-8 size-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 z-40"
+          onClick={openAddSheet}
+          disabled={!isSupabaseConfigured}
+        >
+          <Plus className="size-6" />
+        </Button>
+      )}
     </>
   );
 }

@@ -17,11 +17,11 @@
 
 /** Colors - https://tailwindcss.com/docs/colors **/
 :root {
-  --background: var(--color-white);
+  --background: #fffaf5;
   --foreground: var(--color-zinc-950);
-  --card: var(--color-white);
+  --card: #fffaf5;
   --card-foreground: var(--color-zinc-950);
-  --popover: var(--color-white);
+  --popover: #fffaf5;
   --popover-foreground: var(--color-zinc-950);
   --primary: var(--color-zinc-900);
   --primary-foreground: var(--color-white);
@@ -42,6 +42,11 @@
   --input: var(--color-zinc-200);
   --ring: var(--color-zinc-400);
   --radius: 0.5rem;
+  
+  /* Roofly Landing Page Design Tokens */
+  --primary-glow: 32 100% 65%;
+  --accent-glow: 172 55% 55%;
+  --gradient-sunset: linear-gradient(135deg, hsl(32 100% 65%) 0%, hsl(22 95% 55%) 50%, hsl(14 85% 48%) 100%);
 }
 
 .dark {
@@ -120,6 +125,11 @@
       transform: translateY(calc(-100% - var(--gap)));
     }
   }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
 }
 
 /** Global Styles **/
@@ -156,6 +166,11 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
 /** Custom Containers **/
 @utility container {
   @apply mx-auto max-w-none px-4 lg:px-5;
@@ -167,6 +182,21 @@ html {
 
 @utility container-fluid {
   @apply w-full mx-auto px-4 lg:px-5;
+}
+
+@utility gradient-sunset {
+  background: var(--gradient-sunset);
+}
+
+@utility grid-pattern {
+  background-image:
+    linear-gradient(hsl(0 0% 100% / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 100% / 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+@utility pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
 }
 
 /* Metronic Configs */

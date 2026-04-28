@@ -7,6 +7,7 @@ import { Mail, MoreHorizontal, Pencil, Phone, Plus, Trash2, Users, Search } from
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDeleteTenant, useTenants } from '@/hooks/use-tenants';
+import { useHousehold } from '@/hooks/use-household';
 import type { Tenant } from '@/types/tenant';
 import { TenantFormSheet } from '@/components/tenant-form-sheet';
 import { Badge } from '@/components/ui/badge';
@@ -51,10 +52,12 @@ function TenantCard({
   tenant,
   onEdit,
   onDelete,
+  isAdmin,
 }: {
   tenant: Tenant;
   onEdit: (t: Tenant) => void;
   onDelete: (t: Tenant) => void;
+  isAdmin: boolean;
 }) {
   const isActive = !tenant.move_out_date;
   const initials = (tenant.name || '??')
@@ -66,7 +69,7 @@ function TenantCard({
     .toUpperCase();
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow group">
+    <div className="bg-white border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-md transition-shadow group">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -93,35 +96,37 @@ function TenantCard({
         </div>
 
         {/* Actions menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              mode="icon"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link to={`/tenants/${tenant.id}`}>View Profile</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit(tenant)}>
-              <Pencil className="size-3.5 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => onDelete(tenant)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="size-3.5 mr-2" />
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {isAdmin && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                mode="icon"
+                size="sm"
+                className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+              >
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to={`/tenants/${tenant.id}`}>View Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(tenant)}>
+                <Pencil className="size-3.5 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => onDelete(tenant)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="size-3.5 mr-2" />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Dates */}
@@ -177,20 +182,21 @@ function TenantCard({
 // ============================================================
 // Empty state
 // ============================================================
-function EmptyState({ onAdd }: { onAdd: () => void }) {
+function EmptyState({ onAdd, isAdmin }: { onAdd: () => void; isAdmin: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="flex items-center justify-center size-16 rounded-2xl bg-primary/10 mb-4">
         <Users className="size-7 text-primary" />
       </div>
       <h3 className="text-base font-semibold text-foreground mb-1.5">No tenants yet</h3>
-      <p className="text-sm text-muted-foreground mb-5 max-w-xs">
-        Add your first tenant to start managing your household.
+      <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto mb-6">
+        Keep track of all property residents, their stay periods, and contact details in one place.
       </p>
-      <Button onClick={onAdd}>
-        <Plus className="size-4" />
-        Add First Tenant
-      </Button>
+      {isAdmin && (
+        <Button onClick={onAdd}>
+          <Plus className="size-4 mr-1.5" /> Add First Housemate
+        </Button>
+      )}
     </div>
   );
 }
@@ -201,7 +207,10 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 export function TenantsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: tenants = [], isLoading } = useTenants();
+  const { data: household } = useHousehold();
   const deleteTenant = useDeleteTenant();
+  
+  const isAdmin = household?.userRole === 'admin';
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = useState(searchParams.get('add') === '1');
@@ -318,13 +327,14 @@ export function TenantsPage() {
             ))}
           </div>
         ) : filteredTenants.length === 0 ? (
-          <EmptyState onAdd={openAdd} />
+          <EmptyState onAdd={openAdd} isAdmin={isAdmin} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredTenants.map((tenant) => (
               <TenantCard
                 key={tenant.id}
                 tenant={tenant}
+                isAdmin={isAdmin}
                 onEdit={openEdit}
                 onDelete={setDeleteTarget}
               />
@@ -362,13 +372,15 @@ export function TenantsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <Button
-        size="icon"
-        className="fixed bottom-8 right-8 size-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 z-40"
-        onClick={openAdd}
-      >
-        <Plus className="size-6" />
-      </Button>
+      {isAdmin && (
+        <Button
+          size="icon"
+          className="fixed bottom-8 right-8 size-14 rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 z-40"
+          onClick={openAdd}
+        >
+          <Plus className="size-6" />
+        </Button>
+      )}
     </>
   );
 }

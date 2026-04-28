@@ -29,7 +29,7 @@ function StatCard({
   colour: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 flex items-center gap-4">
+    <div className="bg-white border border-border rounded-xl p-5 flex items-center gap-4">
       <div className={`flex items-center justify-center size-12 rounded-xl ${colour}`}>
         <Icon className="size-5 text-white" />
       </div>
@@ -63,12 +63,14 @@ export function DashboardPage() {
             <ToolbarDescription>Overview of your property</ToolbarDescription>
           </ToolbarHeading>
           <ToolbarActions>
-            <Button asChild>
-              <Link to="/tenants?add=1">
-                <Plus className="size-4" />
-                Add Tenant
-              </Link>
-            </Button>
+            {household?.userRole === 'admin' && (
+              <Button asChild>
+                <Link to="/tenants?add=1">
+                  <Plus className="size-4" />
+                  Add Tenant
+                </Link>
+              </Button>
+            )}
           </ToolbarActions>
         </Toolbar>
 
@@ -147,7 +149,7 @@ export function DashboardPage() {
         )}
 
         {/* Pending Approvals (Admin only) */}
-        {!isLoadingPending && pendingProfiles.length > 0 && (
+        {household?.userRole === 'admin' && !isLoadingPending && pendingProfiles.length > 0 && (
           <div className="bg-white border-2 border-[#E67E22]/20 rounded-2xl overflow-hidden">
             <div className="bg-[#E67E22]/5 px-5 py-3 border-b border-[#E67E22]/10 flex items-center justify-between">
               <h3 className="text-sm font-bold text-[#E67E22] flex items-center gap-2">
@@ -160,10 +162,16 @@ export function DashboardPage() {
                 <div key={p.id} className="p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded-full bg-zinc-100 flex items-center justify-center font-bold text-zinc-500 overflow-hidden">
-                      {p.avatar_url ? <img src={p.avatar_url} className="size-full object-cover" /> : p.full_name[0]}
+                      {p.avatar_url ? (
+                        <img src={p.avatar_url} className="size-full object-cover" />
+                      ) : (
+                        (p.first_name?.[0] || 'U')
+                      )}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{p.full_name}</p>
+                      <p className="text-sm font-bold text-zinc-900">
+                        {p.first_name} {p.last_name}
+                      </p>
                       <p className="text-xs text-zinc-500">{p.phone || 'No phone'}</p>
                     </div>
                   </div>
@@ -182,7 +190,7 @@ export function DashboardPage() {
         )}
 
         {/* Recent Tenants */}
-        <div className="bg-card border border-border rounded-xl">
+        <div className="bg-white border border-border rounded-xl">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Recent Tenants</h2>
             <Button variant="ghost" size="sm" asChild>
