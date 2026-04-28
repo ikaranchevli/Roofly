@@ -47,6 +47,15 @@ export function uid(): string {
   return (Date.now() + Math.floor(Math.random() * 1000)).toString();
 }
 
+export function generateJoinCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export function getInitials(
   name: string | null | undefined,
   count?: number,

@@ -63,16 +63,28 @@ export function useCreateBill() {
       documentFile?: File | null;
       splits: Omit<BillSplit, 'id' | 'bill_id' | 'created_at'>[];
     }) => {
-      // 0. Upload document if present
+      // 0. Get user's household
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('users')
+        .select('household_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.household_id) {
+        throw new Error('You must belong to a household to add bills.');
+      }
+
+      // 1. Upload document if present
       let document_path = bill.document_path;
       if (documentFile) {
         document_path = await uploadBillDocument(documentFile);
       }
 
-      // 1. Insert the bill
+      // 2. Insert the bill
       const { data: insertedBill, error: billError } = await supabase
         .from('bills')
-        .insert({ ...bill, document_path })
+        .insert({ ...bill, household_id: profile.household_id, document_path })
         .select()
         .single();
 

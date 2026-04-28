@@ -57,8 +57,9 @@ function TenantCard({
   onDelete: (t: Tenant) => void;
 }) {
   const isActive = !tenant.move_out_date;
-  const initials = tenant.name
+  const initials = (tenant.name || '??')
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
@@ -81,12 +82,12 @@ function TenantCard({
               {tenant.name}
             </Link>
             <Badge
-              variant={isActive ? 'success' : 'secondary'}
+              variant={tenant.status === 'pending' ? 'warning' : (isActive ? 'success' : 'secondary')}
               appearance="light"
               size="sm"
               className="mt-1"
             >
-              {isActive ? 'Active' : 'Moved Out'}
+              {tenant.status === 'pending' ? 'Pending' : (isActive ? 'Active' : 'Moved Out')}
             </Badge>
           </div>
         </div>
@@ -128,7 +129,9 @@ function TenantCard({
         <div className="bg-muted/50 rounded-lg p-2.5">
           <p className="text-muted-foreground mb-0.5">Move In</p>
           <p className="font-medium text-foreground">
-            {format(parseISO(tenant.move_in_date), 'dd MMM yyyy')}
+            {tenant.move_in_date 
+              ? format(parseISO(tenant.move_in_date), 'dd MMM yyyy')
+              : 'N/A'}
           </p>
         </div>
         <div className="bg-muted/50 rounded-lg p-2.5">
@@ -219,7 +222,11 @@ export function TenantsPage() {
       if (searchQuery && !t.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       return true;
     })
-    .sort((a, b) => parseISO(a.move_in_date).getTime() - parseISO(b.move_in_date).getTime());
+    .sort((a, b) => {
+      const dateA = a.move_in_date ? parseISO(a.move_in_date).getTime() : 0;
+      const dateB = b.move_in_date ? parseISO(b.move_in_date).getTime() : 0;
+      return dateA - dateB;
+    });
 
   function openAdd() {
     setEditingTenant(null);

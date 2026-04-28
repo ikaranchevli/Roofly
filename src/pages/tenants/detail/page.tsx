@@ -136,19 +136,19 @@ export function TenantDetailPage() {
   }
 
   const isActive = !tenant.move_out_date;
-  const initials = tenant.name
+  const initials = (tenant.name || '??')
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
 
   const daysStayed = isActive
-    ? differenceInDays(new Date(), parseISO(tenant.move_in_date))
-    : differenceInDays(
-        parseISO(tenant.move_out_date!),
-        parseISO(tenant.move_in_date),
-      );
+    ? (tenant.move_in_date ? differenceInDays(new Date(), parseISO(tenant.move_in_date)) : 0)
+    : (tenant.move_in_date && tenant.move_out_date 
+        ? differenceInDays(parseISO(tenant.move_out_date), parseISO(tenant.move_in_date)) 
+        : 0);
 
   return (
     <>
@@ -269,7 +269,7 @@ export function TenantDetailPage() {
               <div className="p-5">
                 <TimelineItem
                   label="Move-In Date"
-                  date={format(parseISO(tenant.move_in_date), 'EEEE, dd MMMM yyyy')}
+                  date={tenant.move_in_date ? format(parseISO(tenant.move_in_date), 'EEEE, dd MMMM yyyy') : 'No move-in date set'}
                   colour="bg-emerald-500"
                 />
                 <TimelineItem
@@ -277,7 +277,7 @@ export function TenantDetailPage() {
                   date={
                     isActive
                       ? 'Currently living at the property'
-                      : format(parseISO(tenant.move_out_date!), 'EEEE, dd MMMM yyyy')
+                      : (tenant.move_out_date ? format(parseISO(tenant.move_out_date), 'EEEE, dd MMMM yyyy') : 'No move-out date set')
                   }
                   isLast
                   colour={isActive ? 'bg-blue-500' : 'bg-zinc-400'}
@@ -294,13 +294,13 @@ export function TenantDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Added</span>
                   <span className="text-foreground font-medium">
-                    {format(parseISO(tenant.created_at), 'dd MMM yyyy')}
+                    {tenant.created_at ? format(parseISO(tenant.created_at), 'dd MMM yyyy') : 'Unknown'}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Last updated</span>
                   <span className="text-foreground font-medium">
-                    {format(parseISO(tenant.updated_at), 'dd MMM yyyy')}
+                    {tenant.updated_at ? format(parseISO(tenant.updated_at), 'dd MMM yyyy') : 'Unknown'}
                   </span>
                 </div>
               </div>

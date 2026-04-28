@@ -28,17 +28,17 @@ export function SidebarMenu() {
     [pathname],
   );
 
-  // Global classNames for consistent styling
+  // Global classNames for consistent styling on orange background
   const classNames: AccordionMenuClassNames = {
     root: 'lg:ps-1 space-y-3',
     group: 'gap-px',
     label:
-      'uppercase text-xs font-medium text-muted-foreground/70 pt-2.25 pb-px',
+      'uppercase text-xs font-medium text-white/50 pt-2.25 pb-px',
     separator: '',
-    item: 'h-8 hover:bg-transparent text-accent-foreground hover:text-primary data-[selected=true]:text-primary data-[selected=true]:bg-muted data-[selected=true]:font-medium',
+    item: 'h-8 hover:bg-transparent text-white/80 hover:text-white data-[selected=true]:text-white data-[selected=true]:bg-white/15 data-[selected=true]:font-semibold',
     sub: '',
     subTrigger:
-      'h-8 hover:bg-transparent text-accent-foreground hover:text-primary data-[selected=true]:text-primary data-[selected=true]:bg-muted data-[selected=true]:font-medium',
+      'h-8 hover:bg-transparent text-white/80 hover:text-white data-[selected=true]:text-white data-[selected=true]:bg-white/15 data-[selected=true]:font-semibold',
     subContent: 'py-0',
     indicator: '',
   };

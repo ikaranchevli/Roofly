@@ -43,13 +43,32 @@ export function useTenants() {
     queryKey: tenantKeys.lists(),
     enabled: isSupabaseConfigured,
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('household_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.household_id) return [];
+
       const { data, error } = await supabase
-        .from('tenants')
-        .select('*, documents:tenant_documents(*)')
+        .from('users')
+        .select('id, first_name, last_name, status, move_in_date, move_out_date, phone, email, household_id, created_at, documents:user_documents(*)')
+        .eq('household_id', profile.household_id)
         .order('move_in_date', { ascending: false });
 
       if (error) throw error;
-      return data as Tenant[];
+      
+      // Add virtual name field for backward compatibility
+      const tenantsWithNames = (data || []).map(t => ({
+        ...t,
+        name: `${t.first_name || ''} ${t.last_name || ''}`.trim()
+      }));
+
+      return tenantsWithNames as Tenant[];
     },
   });
 }
@@ -63,14 +82,14 @@ export function useTenant(id: string) {
     enabled: !!id && isSupabaseConfigured,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tenants')
-        .select('*, documents:tenant_documents(*)')
+        .from('users')
+        .select('id, first_name, last_name, status, move_in_date, move_out_date, phone, email, household_id, created_at, documents:user_documents(*)')
         .eq('id', id)
         .single();
 
       if (error) throw error;
 
-      const tenant = data as Tenant;
+      const tenant = { ...data, name: `${data.first_name || ''} ${data.last_name || ''}`.trim() } as Tenant;
       if (tenant.documents?.length) {
         tenant.documents = await enrichDocuments(tenant.documents);
       }
@@ -87,30 +106,43 @@ export function useCreateTenant() {
 
   return useMutation<Tenant, Error, TenantFormValues>({
     mutationFn: async (values) => {
+      // 0. Get user's household
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('users')
+        .select('household_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (!profile?.household_id) {
+        throw new Error('You must belong to a household to add tenants.');
+      }
+
       // 1. Insert tenant row
       const { data: tenant, error } = await supabase
-        .from('tenants')
+        .from('users')
         .insert({
-          name: values.name,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          household_id: profile.household_id,
           move_in_date: values.move_in_date,
           move_out_date:
             values.currently_living || !values.move_out_date
               ? null
               : values.move_out_date,
           phone: values.phone || null,
-          email: values.email || null,
+          role: 'housemate',
+          status: 'pending',
         })
-        .select()
+        .select('id, first_name, last_name, status, move_in_date, move_out_date, phone, email, household_id, created_at')
         .single();
 
       if (error) throw error;
 
-      // 2. Upload documents
-      if (values.new_documents.length > 0) {
-        await uploadDocuments(tenant.id, values.new_documents);
-      }
-
-      return tenant as Tenant;
+      return {
+        ...tenant,
+        name: `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim()
+      } as Tenant;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: tenantKeys.lists() });
@@ -132,19 +164,19 @@ export function useUpdateTenant() {
     mutationFn: async ({ id, values }) => {
       // 1. Update tenant row
       const { data: tenant, error } = await supabase
-        .from('tenants')
+        .from('users')
         .update({
-          name: values.name,
+          first_name: values.first_name,
+          last_name: values.last_name,
           move_in_date: values.move_in_date,
           move_out_date:
             values.currently_living || !values.move_out_date
               ? null
               : values.move_out_date,
           phone: values.phone || null,
-          email: values.email || null,
         })
         .eq('id', id)
-        .select()
+        .select('id, first_name, last_name, status, move_in_date, move_out_date, phone, email, household_id, created_at')
         .single();
 
       if (error) throw error;
@@ -159,7 +191,10 @@ export function useUpdateTenant() {
         await uploadDocuments(id, values.new_documents);
       }
 
-      return tenant as Tenant;
+      return {
+        ...tenant,
+        name: `${tenant.first_name || ''} ${tenant.last_name || ''}`.trim()
+      } as Tenant;
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: tenantKeys.lists() });
@@ -178,9 +213,9 @@ export function useDeleteTenant() {
     mutationFn: async (id) => {
       // Fetch documents to remove from Storage
       const { data: docs } = await supabase
-        .from('tenant_documents')
+        .from('user_documents')
         .select('file_path')
-        .eq('tenant_id', id);
+        .eq('user_id', id);
 
       if (docs && docs.length > 0) {
         const paths = docs.map((d: { file_path: string }) => d.file_path);
@@ -188,7 +223,7 @@ export function useDeleteTenant() {
       }
 
       // Deleting tenant will cascade-delete documents rows
-      const { error } = await supabase.from('tenants').delete().eq('id', id);
+      const { error } = await supabase.from('users').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -212,8 +247,8 @@ async function uploadDocuments(tenantId: string, files: File[]) {
 
       if (uploadError) throw uploadError;
 
-      const { error: dbError } = await supabase.from('tenant_documents').insert({
-        tenant_id: tenantId,
+      const { error: dbError } = await supabase.from('user_documents').insert({
+        user_id: tenantId,
         name: file.name,
         file_path: filePath,
         size: file.size,
@@ -237,5 +272,5 @@ async function removeDocuments(docIds: string[]) {
     await supabase.storage.from(DOCUMENTS_BUCKET).remove(paths);
   }
 
-  await supabase.from('tenant_documents').delete().in('id', docIds);
+  await supabase.from('user_documents').delete().in('id', docIds);
 }

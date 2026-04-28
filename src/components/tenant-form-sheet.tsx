@@ -30,12 +30,12 @@ import { cn } from '@/lib/utils';
 // ============================================================
 const schema = z
   .object({
-    name: z.string().min(1, 'Name is required'),
+    first_name: z.string().min(1, 'First name is required'),
+    last_name: z.string().min(1, 'Last name is required'),
     move_in_date: z.string().min(1, 'Move-in date is required'),
     currently_living: z.boolean(),
     move_out_date: z.string().nullable().optional(),
     phone: z.string().optional(),
-    email: z.string().email('Invalid email address').optional().or(z.literal('')),
     new_documents: z.array(z.instanceof(File)).default([]),
     removed_document_ids: z.array(z.string()).default([]),
   })
@@ -76,12 +76,12 @@ export function TenantFormSheet({ open, onOpenChange, tenant }: TenantFormSheetP
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: '',
+      first_name: '',
+      last_name: '',
       move_in_date: '',
       currently_living: true,
       move_out_date: null,
       phone: '',
-      email: '',
       new_documents: [],
       removed_document_ids: [],
     },
@@ -95,24 +95,24 @@ export function TenantFormSheet({ open, onOpenChange, tenant }: TenantFormSheetP
     if (open && tenant) {
       setExistingDocs(tenant.documents ?? []);
       form.reset({
-        name: tenant.name,
+        first_name: tenant.first_name,
+        last_name: tenant.last_name,
         move_in_date: tenant.move_in_date,
         currently_living: !tenant.move_out_date,
         move_out_date: tenant.move_out_date,
         phone: tenant.phone ?? '',
-        email: tenant.email ?? '',
         new_documents: [],
         removed_document_ids: [],
       });
     } else if (open && !tenant) {
       setExistingDocs([]);
       form.reset({
-        name: '',
+        first_name: '',
+        last_name: '',
         move_in_date: '',
         currently_living: true,
         move_out_date: null,
         phone: '',
-        email: '',
         new_documents: [],
         removed_document_ids: [],
       });
@@ -122,12 +122,12 @@ export function TenantFormSheet({ open, onOpenChange, tenant }: TenantFormSheetP
   async function onSubmit(values: FormValues) {
     try {
       const payload = {
-        name: values.name,
+        first_name: values.first_name,
+        last_name: values.last_name,
         move_in_date: values.move_in_date,
         currently_living: values.currently_living,
         move_out_date: values.move_out_date ?? null,
         phone: values.phone ?? '',
-        email: values.email ?? '',
         new_documents: values.new_documents,
         removed_document_ids: values.removed_document_ids,
       };
@@ -189,20 +189,35 @@ export function TenantFormSheet({ open, onOpenChange, tenant }: TenantFormSheetP
             className="flex flex-col flex-1 overflow-hidden"
           >
             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-              {/* Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Full Name <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Jane Smith" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Name Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Jane" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="Smith" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {/* Move-in date */}
               <FormField
@@ -283,20 +298,7 @@ export function TenantFormSheet({ open, onOpenChange, tenant }: TenantFormSheetP
                     )}
                   />
 
-                  {/* Email */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email Address</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="jane@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                 </div>
               </div>
 

@@ -1,52 +1,52 @@
-import { ChevronFirst } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/lib/helpers';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { useLayout } from './context';
 
 export function SidebarHeader() {
-  const { sidebarCollapse, setSidebarCollapse } = useLayout();
-
-  const handleToggleClick = () => {
-    setSidebarCollapse(!sidebarCollapse);
-  };
 
   return (
     <div className="sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-5 shrink-0">
       <Link to="/dashboard" className="flex items-center gap-3 overflow-hidden min-w-0">
-        {/* Logo icon — always visible, orange bg so white strokes show up */}
-        <div className="flex items-center justify-center size-9 rounded-xl bg-[#E67E22] shrink-0 p-1.5">
+        {/* Frosted glass logo container — matches login page */}
+        <div
+          className="shrink-0"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: 'rgba(255,255,255,0.2)',
+            backdropFilter: 'blur(8px)',
+            padding: 6,
+            border: '1px solid rgba(255,255,255,0.3)',
+          }}
+        >
           <img
-            src={toAbsoluteUrl('/roofly-logo.svg')}
+            src={toAbsoluteUrl('/logo-white.png')}
             alt="Roofly logo"
-            className="w-full h-full object-contain"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg');
+            }}
           />
         </div>
 
-        {/* Wordmark — hidden when sidebar collapsed */}
-        <div className="default-logo flex flex-col leading-none min-w-0">
-          <span className="text-base font-extrabold tracking-tight text-foreground">
-            Roofly
+        {/* Wordmark — hidden when sidebar is collapsed */}
+        <div className="default-logo flex flex-col leading-none min-w-0 overflow-hidden">
+          <span
+            className="truncate"
+            style={{ fontFamily: "'Zolo', sans-serif", fontWeight: 400, fontSize: 28, color: 'white', letterSpacing: '0.5px' }}
+          >
+            roofly
           </span>
-          <span className="text-[10px] font-medium text-muted-foreground tracking-wide mt-0.5 truncate">
-            Cozy. Connected. Confirmed.
+          <span
+            className="truncate"
+            style={{ fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.7px', marginTop: 2 }}
+          >
           </span>
         </div>
       </Link>
-
-      <Button
-        onClick={handleToggleClick}
-        size="sm"
-        mode="icon"
-        variant="outline"
-        className={cn(
-          'size-7 absolute start-full top-2/4 rtl:translate-x-2/4 -translate-x-2/4 -translate-y-2/4',
-          sidebarCollapse ? 'ltr:rotate-180' : 'rtl:rotate-180',
-        )}
-      >
-        <ChevronFirst className="size-4!" />
-      </Button>
     </div>
   );
 }

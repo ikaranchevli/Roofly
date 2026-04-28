@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { AlertTriangle, FileText, Plus, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, FileText, Plus, TrendingUp, Users, Home } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { toast } from 'sonner';
 import { useTenants } from '@/hooks/use-tenants';
+import { useHousehold } from '@/hooks/use-household';
+import { usePendingProfiles, useApproveProfile } from '@/hooks/use-profiles';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +43,9 @@ function StatCard({
 
 export function DashboardPage() {
   const { data: tenants = [], isLoading } = useTenants();
+  const { data: household, isLoading: isLoadingHousehold } = useHousehold();
+  const { data: pendingProfiles = [], isLoading: isLoadingPending } = usePendingProfiles();
+  const approveProfile = useApproveProfile();
 
   const activeCount = tenants.filter((t) => !t.move_out_date).length;
   const movedOutCount = tenants.filter((t) => !!t.move_out_date).length;
@@ -103,6 +109,78 @@ export function DashboardPage() {
           />
         </div>
 
+        {/* Household Info (Admin only) */}
+        {!isLoadingHousehold && household && household.userRole === 'admin' && (
+          <div className="bg-gradient-to-br from-[#E67E22]/10 to-transparent border border-[#E67E22]/20 rounded-xl p-6 relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold text-zinc-900">{household.name}</h3>
+                <p className="text-sm text-zinc-500 flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-[#E67E22]"></span>
+                  {household.address}
+                </p>
+              </div>
+
+              <div className="bg-white border border-zinc-200 rounded-2xl p-4 flex items-center gap-6 shadow-sm">
+                <div>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Roofly Key</p>
+                  <p className="text-2xl font-black text-zinc-900 tracking-widest">{household.join_code}</p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(household.join_code);
+                    toast.success('Join code copied to clipboard');
+                  }}
+                  className="bg-[#E67E22] hover:bg-[#D35400] text-white rounded-xl h-10"
+                >
+                  Copy Code
+                </Button>
+              </div>
+            </div>
+
+            {/* Decorative background element */}
+            <div className="absolute top-0 right-0 p-4 opacity-[0.03] pointer-events-none">
+              <Home className="size-32" />
+            </div>
+          </div>
+        )}
+
+        {/* Pending Approvals (Admin only) */}
+        {!isLoadingPending && pendingProfiles.length > 0 && (
+          <div className="bg-white border-2 border-[#E67E22]/20 rounded-2xl overflow-hidden">
+            <div className="bg-[#E67E22]/5 px-5 py-3 border-b border-[#E67E22]/10 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-[#E67E22] flex items-center gap-2">
+                <Users className="size-4" />
+                Join Requests ({pendingProfiles.length})
+              </h3>
+            </div>
+            <div className="divide-y divide-zinc-100">
+              {pendingProfiles.map((p: any) => (
+                <div key={p.id} className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-zinc-100 flex items-center justify-center font-bold text-zinc-500 overflow-hidden">
+                      {p.avatar_url ? <img src={p.avatar_url} className="size-full object-cover" /> : p.full_name[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-zinc-900">{p.full_name}</p>
+                      <p className="text-xs text-zinc-500">{p.phone || 'No phone'}</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => approveProfile.mutate(p.id)}
+                    disabled={approveProfile.isPending}
+                    className="bg-[#E67E22] hover:bg-[#D35400] text-white rounded-xl"
+                  >
+                    Approve
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Recent Tenants */}
         <div className="bg-card border border-border rounded-xl">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border">
@@ -129,8 +207,9 @@ export function DashboardPage() {
                 <li key={tenant.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors">
                   {/* Avatar initials */}
                   <div className="flex items-center justify-center size-9 rounded-full bg-primary/10 text-primary font-semibold text-sm shrink-0">
-                    {tenant.name
+                    {(tenant.name || '??')
                       .split(' ')
+                      .filter(Boolean)
                       .map((n) => n[0])
                       .slice(0, 2)
                       .join('')
@@ -144,7 +223,9 @@ export function DashboardPage() {
                       {tenant.name}
                     </Link>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Moved in {format(parseISO(tenant.move_in_date), 'dd MMM yyyy')}
+                      {tenant.move_in_date
+                        ? `Moved in ${format(parseISO(tenant.move_in_date), 'dd MMM yyyy')}`
+                        : 'No move-in date'}
                     </p>
                   </div>
                   <Badge variant={tenant.move_out_date ? 'secondary' : 'success'} size="sm">

@@ -26,7 +26,6 @@ export function Main() {
     // Add a class to the body element
     bodyClass.add('demo1');
     bodyClass.add('sidebar-fixed');
-    bodyClass.add('header-fixed');
 
     const timer = setTimeout(() => {
       bodyClass.add('layout-initialized');
@@ -37,7 +36,6 @@ export function Main() {
       bodyClass.remove('demo1');
       bodyClass.remove('sidebar-fixed');
       bodyClass.remove('sidebar-collapse');
-      bodyClass.remove('header-fixed');
       bodyClass.remove('layout-initialized');
       clearTimeout(timer);
     };
@@ -48,9 +46,9 @@ export function Main() {
       {!isMobile && <Sidebar />}
 
       <div className="wrapper flex grow flex-col">
-        <Header />
+        {isMobile && <Header />}
 
-        <main className="grow pt-5" role="content">
+        <main className="grow pt-5 lg:pt-10" role="content">
           <Outlet />
         </main>
 
