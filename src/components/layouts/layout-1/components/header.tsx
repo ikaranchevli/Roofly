@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Sun, Copy, Check, LogOut } from 'lucide-react';
+import { useHousehold } from '@/hooks/use-household';
+import { supabase } from '@/lib/supabase';
 import { useTheme } from 'next-themes';
 import { useLocation } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -19,6 +21,16 @@ import { SidebarMenu } from './sidebar-menu';
 
 export function Header() {
   const [isSidebarSheetOpen, setIsSidebarSheetOpen] = useState(false);
+  const { data: household } = useHousehold();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (household?.join_code) {
+      navigator.clipboard.writeText(household.join_code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
   const { pathname } = useLocation();
   const mobileMode = useIsMobile();
   const scrollPosition = useScrollPosition();
@@ -31,29 +43,15 @@ export function Header() {
   return (
     <header
       className={cn(
-        'header fixed top-0 z-10 start-0 flex items-stretch shrink-0 border-b border-transparent bg-background end-0 pe-[var(--removed-body-scroll-bar-size,0px)]',
+        'header fixed top-0 z-50 start-0 flex items-stretch shrink-0 border-b border-transparent bg-background end-0 pe-[var(--removed-body-scroll-bar-size,0px)]',
         headerSticky && 'border-b border-border',
       )}
     >
-      <div className="container-fluid flex justify-between items-stretch lg:gap-4">
-        {/* Mobile: Logo + Sidebar toggle */}
-        <div className="flex lg:hidden items-center gap-2.5">
-          <Link to="/dashboard" className="shrink-0 flex items-center gap-2">
-            <div className="flex items-center justify-center size-8 rounded-lg bg-[#E67E22] p-1.5">
-              <img
-                src={toAbsoluteUrl('/logo-white.png')}
-                alt="Roofly"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg');
-                }}
-              />
-            </div>
-            <span style={{ fontFamily: "'Zolo', sans-serif", fontWeight: 400, fontSize: 18 }} className="text-foreground">
-              roofly
-            </span>
-          </Link>
-          <div className="flex items-center">
+      <div className="container-fluid flex items-center h-[64px] relative">
+        {/* Mobile View: Hamburger Left, Logo Center */}
+        <div className="flex lg:hidden items-center w-full relative">
+          {/* Hamburger Menu (Left) */}
+          <div className="flex items-center z-20">
             {mobileMode && (
               <Sheet
                 open={isSidebarSheetOpen}
@@ -65,7 +63,7 @@ export function Header() {
                   </Button>
                 </SheetTrigger>
                 <SheetContent
-                  className="p-0 gap-0 w-[275px] border-0"
+                  className="p-0 gap-0 w-[285px] border-0 flex flex-col"
                   side="left"
                   close={false}
                   style={{
@@ -117,17 +115,72 @@ export function Header() {
                     <div style={{ height: 1, background: 'rgba(255,255,255,0.15)', marginInline: 20 }} />
                   </SheetHeader>
 
-                  <SheetBody className="p-0 overflow-y-auto" style={{ position: 'relative', zIndex: 1 }}>
+                  {/* House Key Card (New for Mobile) */}
+                  <div className="px-5 mb-4 mt-6" style={{ position: 'relative', zIndex: 1 }}>
+                    <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-2 px-1">
+                      House Roofly Key
+                    </div>
+                    <div
+                      onClick={handleCopy}
+                      className="group relative flex items-center justify-between p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 cursor-pointer transition-all active:scale-[0.98]"
+                      style={{ backdropFilter: 'blur(4px)' }}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-white font-mono text-lg font-bold tracking-[0.1em] leading-none">
+                          {household?.join_code || '------'}
+                        </span>
+                      </div>
+                      <div className="size-8 rounded-lg bg-white/10 flex items-center justify-center text-white/70 group-hover:text-white transition-colors">
+                        {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                      </div>
+                    </div>
+                  </div>
+
+                  <SheetBody className="p-0 overflow-y-auto flex-1" style={{ position: 'relative', zIndex: 1 }}>
                     <SidebarMenu />
                   </SheetBody>
+
+                  {/* Mobile Logout (New) */}
+                  <div className="p-5 mt-auto border-t border-white/10" style={{ position: 'relative', zIndex: 1 }}>
+                    <button
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        setIsSidebarSheetOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10 font-medium"
+                    >
+                      <LogOut className="size-4" />
+                      <span>Log out</span>
+                    </button>
+                  </div>
                 </SheetContent>
               </Sheet>
             )}
           </div>
+
+          {/* Logo (Centered) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Link to="/dashboard" className="shrink-0 flex items-center gap-2 pointer-events-auto">
+              <div className="flex items-center justify-center size-9 rounded-lg bg-[#E67E22] p-2 shadow-sm">
+                <img
+                  src={toAbsoluteUrl('/logo-white.png')}
+                  alt="Roofly"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = toAbsoluteUrl('/roofly-logo.svg');
+                  }}
+                />
+              </div>
+              <span style={{ fontFamily: "'Zolo', sans-serif", fontWeight: 400, fontSize: 28 }} className="text-foreground">
+                roofly
+              </span>
+            </Link>
+          </div>
         </div>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2 ms-auto">
+        {/* Desktop View: (Add logic if needed, currently empty right actions) */}
+        <div className="hidden lg:flex items-center justify-between w-full">
+          {/* Add desktop topbar elements here if needed */}
         </div>
       </div>
     </header>

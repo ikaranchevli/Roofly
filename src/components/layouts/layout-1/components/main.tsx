@@ -48,7 +48,7 @@ export function Main() {
       <div className="wrapper flex grow flex-col">
         {isMobile && <Header />}
 
-        <main className="grow pt-5 lg:pt-10" role="content">
+        <main className="grow pt-16 lg:pt-10" role="content">
           <Outlet />
         </main>
 
